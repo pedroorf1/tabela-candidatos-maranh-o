@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useSearchP
 import { CANDIDATOS, CORTE } from './data/candidatos.js';
 import { Sidebar, Topbar, ListaNav, Orgaos, SobreFinal } from './components/Sidebar.jsx';
 import Faixa from './components/Faixa.jsx';
+import Indicados from './components/Indicados.jsx';
 import Visitas from './components/Visitas.jsx';
 import { Inicio } from './pages/Inicio.jsx';
 import { Candidatos } from './pages/Candidatos.jsx';
@@ -66,6 +67,7 @@ function Moldura() {
         <Sidebar />
         <div className="coluna">
           <Faixa />
+          <Indicados />
           <main id="conteudo" className="wrap" tabIndex={-1}>
             <Outlet />
           </main>

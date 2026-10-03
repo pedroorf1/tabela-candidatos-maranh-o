@@ -70,5 +70,14 @@ ok(
 );
 ok(!JSON.stringify(DIREITA).includes('Jair Bolsonaro'), 'sem candidatura inventada (Jair inelegível fora)');
 
+const { INDICADOS } = await import('../src/data/indicados.js');
+ok(INDICADOS.length === 5, '5 indicados');
+ok(
+  JSON.stringify(INDICADOS.map((c) => `${c.numero}/${c.cargo}`)) ===
+    JSON.stringify(['22/Presidente', '28/Governador', '222/Senador', '300/Senador', '2210/Deputada Federal']),
+  'chapa de indicados intacta (22, 28, 222, 300, 2210)'
+);
+ok(INDICADOS.find((c) => c.numero === '28').status.includes('Confira a situação no TSE'), 'card do 28 sem menção processual');
+
 if (erros) { console.error(`\n${erros} trava(s) violadas — build bloqueado`); process.exit(1); }
 console.log('\nTrava-dados: tudo intacto');
