@@ -227,6 +227,21 @@ a.btn { text-decoration: none; display: inline-block; }
 .perigo { background: var(--danger-bg); border: 1px solid var(--danger); border-radius: 10px; padding: .8rem 1rem; font-size: .9rem; }
 .secao { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; margin: 1rem 0; box-shadow: var(--shadow); }
 .secao h2 { margin-top: 0; font-size: 1.02rem; }
+/* Faixa de indicados (abaixo do banner, em todas as páginas) */
+.indicados { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 1rem 1.2rem 1.2rem; }
+.indicados-topo { max-width: 1080px; margin: 0 auto .6rem; }
+.indicados-topo h2 { margin: 0; font-size: 1.1rem; }
+.indicados-topo .meta { margin: .1rem 0 0; }
+.indicados-lista { max-width: 1080px; margin: 0 auto; display: grid; gap: .7rem; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); align-items: stretch; }
+.indicado { scroll-snap-align: start; background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--nav-active); border-radius: var(--radius); padding: .9rem .9rem calc(3.6rem + 30px); display: grid; gap: .3rem; align-content: start; height: 100%; position: relative; box-shadow: var(--shadow); animation: sobe .4s ease backwards; }
+.indicado-cargo { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--brand); }
+.indicado h3 { margin: 0; font-size: 1rem; }
+.indicado-num { margin: 0; font-size: .95rem; }
+.indicado .meta { margin: 0; font-size: .78rem; }
+.indicado-credito { margin: 0; font-size: .68rem; color: var(--muted); }
+.indicado .btn { position: absolute; left: .9rem; right: .9rem; bottom: .9rem; margin: 0; }
+.indicado-foto { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--nav-active); }
+.indicado-ini { width: 64px; height: 64px; border-radius: 50%; background: var(--brand); color: var(--brand-ink); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; }
 /* Vidro (página Configurações) */
 .vidro {
   background: var(--surface);
