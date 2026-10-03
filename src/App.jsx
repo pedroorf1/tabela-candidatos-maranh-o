@@ -8,6 +8,7 @@ import Indicados from './components/Indicados.jsx';
 import Visitas from './components/Visitas.jsx';
 import { Inicio } from './pages/Inicio.jsx';
 import { Candidatos } from './pages/Candidatos.jsx';
+import { Governador } from './pages/Governador.jsx';
 import { Ficha } from './pages/Ficha.jsx';
 import { Pesquisas } from './pages/Pesquisas.jsx';
 import { Redes } from './pages/Redes.jsx';
@@ -18,6 +19,7 @@ const TITULO_BASE = 'Maranhão Candidatos e Suas Possibilidades de Eleição | P
 const TITULOS = {
   '/': TITULO_BASE,
   '/candidatos': 'Candidatos do PL · Maranhão 2026 | Possibilidades de Eleição',
+  '/governador': 'Governador do Maranhão 2026 | Possibilidades de Eleição',
   '/pesquisas': 'Pesquisas do Senado (MA) | Possibilidades de Eleição',
   '/redes': 'Direita nas Redes | Possibilidades de Eleição',
   '/config': 'Configurações | Possibilidades de Eleição',
@@ -142,6 +144,7 @@ export default function App() {
         <Route element={<Moldura />}>
           <Route path="/" element={<Raiz />} />
           <Route path="/candidatos" element={<Candidatos />} />
+          <Route path="/governador" element={<Governador />} />
           <Route path="/candidato/:numero" element={<RotaFicha />} />
           <Route path="/pesquisas" element={<Pesquisas />} />
           <Route path="/redes" element={<Redes />} />

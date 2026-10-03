@@ -79,5 +79,14 @@ ok(
 );
 ok(INDICADOS.find((c) => c.numero === '28').status.includes('Confira a situação no TSE'), 'card do 28 sem menção processual');
 
+const { GOVERNADORES } = await import('../src/data/governadores.js');
+ok(GOVERNADORES.length === 8, '8 candidatos ao governo');
+ok(
+  JSON.stringify(GOVERNADORES.map((g) => g.numero).sort((a, b) => a - b)) ===
+    JSON.stringify(['13', '14', '15', '16', '21', '28', '29', '55']),
+  'números dos 8 ao governo'
+);
+ok(GOVERNADORES.every((g) => g.nome && g.partido && g.vice && g.resumo), 'governadores completos');
+
 if (erros) { console.error(`\n${erros} trava(s) violadas — build bloqueado`); process.exit(1); }
 console.log('\nTrava-dados: tudo intacto');

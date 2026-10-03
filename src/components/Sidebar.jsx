@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { FiHome, FiUsers, FiBarChart2, FiAtSign, FiInfo, FiSettings, FiExternalLink, FiMenu } from 'react-icons/fi';
+import { FiHome, FiUsers, FiBarChart2, FiAtSign, FiInfo, FiSettings, FiExternalLink, FiMenu, FiFlag } from 'react-icons/fi';
 import { useApp } from '../store.js';
 
 export const NAV = [
   { to: '/', rotulo: 'Início', Icone: FiHome, fim: true },
   { to: '/candidatos', rotulo: 'Candidatos', Icone: FiUsers },
+  { to: '/governador', rotulo: 'Governador', Icone: FiFlag },
   { to: '/pesquisas', rotulo: 'Pesquisas', Icone: FiBarChart2 },
   { to: '/redes', rotulo: 'Nas Redes', Icone: FiAtSign },
   { to: '/config', rotulo: 'Configurações', Icone: FiSettings },
