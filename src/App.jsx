@@ -3,6 +3,7 @@ import { CANDIDATOS, CORTE, TURNO1 } from './data/candidatos.js';
 import { PESQUISAS_SENADO, PESQUISAS_MUNICIPAIS_NOTA, JUSTICA, FONTES } from './data/eleitoral.js';
 import { indicador, NIVEL_META } from './lib/indicador.js';
 import Share from './components/Share.jsx';
+import Visitas from './components/Visitas.jsx';
 
 function Selo({ ind }) {
   const meta = NIVEL_META[ind.nivel] || {};
@@ -343,6 +344,7 @@ export default function App() {
         <p>Dados organizados nesta página (corte {CORTE}) a partir do TSE e do TRE-MA · sem login · grátis · funciona offline. As possibilidades indicadas são estimativas organizacionais, não são pesquisa eleitoral.</p>
         <p>Confira sempre: <a href="https://sig.tse.jus.br/ords/dwapr/f?p=1002:20">TSE</a> · <a href="https://guardiao.tre-ma.jus.br/painel-rcand/">TRE-MA</a></p>
       </footer>
+      <Visitas />
     </>
   );
 }
