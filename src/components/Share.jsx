@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { indicador } from '../lib/indicador.js';
 
 export function urlCandidato(c) {
@@ -11,13 +12,18 @@ export function textoCandidato(c) {
 }
 
 export default function Share({ candidato }) {
+  const [copiado, setCopiado] = useState(false);
   const compartilhar = async () => {
     const url = candidato ? urlCandidato(candidato) : window.location.href;
     const text = candidato ? textoCandidato(candidato) : 'Maranhão candidatos e suas possibilidades de eleição: 41 candidatos do PL, pesquisas do Senado e Justiça Eleitoral. Veja:';
     if (navigator.share) {
       try { await navigator.share({ title: document.title, text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
     }
-    try { await navigator.clipboard.writeText(`${text} ${url}`); alert('Link copiado! Cole no WhatsApp, X, Facebook ou Telegram.'); }
+    try {
+      await navigator.clipboard.writeText(`${text} ${url}`);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2500);
+    }
     catch { window.prompt('Copie o link para compartilhar:', `${text} ${url}`); }
   };
   const url = candidato ? urlCandidato(candidato) : (typeof window !== 'undefined' ? window.location.href : '');
@@ -26,7 +32,7 @@ export default function Share({ candidato }) {
   const t = encodeURIComponent(text);
   return (
     <div className="share-row" role="group" aria-label="Compartilhar">
-      <button className="btn primary" onClick={compartilhar}>Compartilhar</button>
+      <button className="btn primary" onClick={compartilhar} aria-live="polite">{copiado ? 'Link copiado ✓' : 'Compartilhar'}</button>
       <a className="btn" target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${t}%20${u}`} aria-label="Compartilhar no WhatsApp">WhatsApp</a>
       <a className="btn" target="_blank" rel="noopener noreferrer" href={`https://twitter.com/intent/tweet?text=${t}&url=${u}`} aria-label="Compartilhar no X">X</a>
       <a className="btn" target="_blank" rel="noopener noreferrer" href={`https://www.facebook.com/sharer/sharer.php?u=${u}`} aria-label="Compartilhar no Facebook">Facebook</a>

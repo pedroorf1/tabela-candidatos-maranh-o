@@ -1,8 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CANDIDATOS, CORTE, TURNO1 } from './data/candidatos.js';
 import { PESQUISAS_SENADO, PESQUISAS_MUNICIPAIS_NOTA, JUSTICA, FONTES } from './data/eleitoral.js';
-import { indicador } from './lib/indicador.js';
+import { indicador, NIVEL_META } from './lib/indicador.js';
 import Share from './components/Share.jsx';
+
+function Selo({ ind }) {
+  const meta = NIVEL_META[ind.nivel] || {};
+  return (
+    <span className={`tag ${ind.nivel}`} aria-label={`Possibilidade: ${ind.rotulo}`}>
+      <span aria-hidden="true">{meta.icone}</span> {ind.rotulo}
+    </span>
+  );
+}
 
 const ABAS = [
   { id: 'inicio', rotulo: 'Início', icone: '🏠' },
@@ -33,6 +42,19 @@ export default function App() {
   const [ordem, setOrdem] = useState('cargo');
   const [detalhe, setDetalhe] = useState(null);
   const tituloRef = useRef(null);
+  const ultimoBtn = useRef(null);
+  const voltando = useRef(false);
+
+  // Devolve o foco ao botão do candidato APÓS a lista remontar (pós-commit).
+  // Tabela e cards coexistem no DOM (um escondido por CSS): mira só o visível.
+  useEffect(() => {
+    if (!detalhe && voltando.current) {
+      voltando.current = false;
+      const visivel = (s) => [...document.querySelectorAll(s)].find((el) => el.offsetParent !== null);
+      const el = ultimoBtn.current && visivel(`[data-num="${ultimoBtn.current}"]`);
+      (el || visivel('.busca input'))?.focus({ preventScroll: true });
+    }
+  }, [detalhe]);
 
   // Deep-link ?candidato=NUMERO (query, não hash — lida por bots/share)
   useEffect(() => {
@@ -55,6 +77,7 @@ export default function App() {
   }, []);
 
   const abrirDetalhe = (c) => {
+    ultimoBtn.current = c.numero;
     setDetalhe(c);
     try { window.history.pushState({}, '', `?candidato=${encodeURIComponent(c.numero)}`); } catch {}
     window.scrollTo({ top: 0 });
@@ -62,7 +85,8 @@ export default function App() {
   };
   const fecharDetalhe = () => {
     setDetalhe(null);
-    try { window.history.pushState({}, '', window.location.pathname); } catch {}
+    voltando.current = true;
+    try { window.history.pushState({}, '', window.location.pathname); } catch (e) {}
   };
 
   const lista = useMemo(() => {
@@ -101,6 +125,8 @@ export default function App() {
     // Trocar de aba fecha o detalhe: limpa ?candidato= para refresh não reabrir ficha
     try { window.history.pushState({}, '', window.location.pathname); } catch {}
     window.scrollTo({ top: 0 });
+    // Leva o foco ao conteúdo para leitor de tela/teclado não perderem o contexto
+    requestAnimationFrame(() => document.getElementById('conteudo')?.focus({ preventScroll: true }));
   };
   const limparBusca = () => { setBusca(''); setCargo(''); setFiltroInd(''); setPreset('todos'); };
   const fonteMais = () => { const h = document.documentElement; h.classList.remove('font-minus'); h.classList.add('font-plus'); };
@@ -132,7 +158,7 @@ export default function App() {
         </div>
       </header>
 
-      <main id="conteudo" className="wrap">
+      <main id="conteudo" className="wrap" tabIndex={-1}>
         {aba === 'inicio' && (
           <section aria-label="Visão geral">
             <div className="hero" role="list">
@@ -166,12 +192,13 @@ export default function App() {
           <section aria-label="Candidatos">
             <h2 style={{ marginBottom: 0 }}>Candidatos do PL · Maranhão 2026</h2>
             <p className="meta">Busque por nome ou número de urna. Toque em um candidato para ver a ficha completa e compartilhar.</p>
+            <label className="rotulo-busca" htmlFor="busca-nome">Buscar candidato</label>
             <div className="busca">
-              <input type="search" aria-label="Buscar por nome ou número" placeholder="Buscar por nome ou número… ex.: Detinha ou 22333" value={busca} onChange={(e) => setBusca(e.target.value)} />
+              <input id="busca-nome" type="search" aria-label="Buscar por nome ou número" placeholder="Nome ou número… ex.: Detinha ou 22333" value={busca} onChange={(e) => setBusca(e.target.value)} />
               {(busca || cargo || filtroInd || preset !== 'todos') && <button className="btn" onClick={limparBusca}>Limpar</button>}
             </div>
             <div className="chips" role="group" aria-label="Atalhos">
-              {[['todos', 'Todos'], ['forte', 'Base forte'], ['novatos', 'Sem histórico consolidado'], ['flavio', 'Apoio Flávio 22'], ['justica', 'Atenção na Justiça']].map(([id, r]) => (
+              {[['todos', 'Todos'], ['forte', 'Base forte'], ['novatos', 'Sem histórico verificado'], ['flavio', 'Apoio Flávio 22'], ['justica', 'Atenção na Justiça']].map(([id, r]) => (
                 <button key={id} aria-pressed={preset === id} onClick={() => setPreset(id)}>{r}</button>
               ))}
             </div>
@@ -206,9 +233,9 @@ export default function App() {
                     <tbody>
                       {lista.map((c) => { const ind = indicador(c); return (
                         <tr key={c.numero}>
-                          <td><button className="btn small" onClick={() => abrirDetalhe(c)}><strong>{c.nome}</strong></button><br /><span className="meta">{c.vinculoLabel}</span></td>
+                          <td><button className="btn small" data-num={c.numero} onClick={() => abrirDetalhe(c)}><strong>{c.nome}</strong></button><br /><span className="meta">{c.vinculoLabel}</span></td>
                           <td>{c.cargo}<br /><strong>{c.numero}</strong></td>
-                          <td><span className={`tag ${ind.nivel}`}>{ind.rotulo}</span></td>
+                          <td><Selo ind={ind} /></td>
                           <td>{c.impugnacao ? 'Impugnação em análise' : c.situacao}</td>
                         </tr> ); })}
                     </tbody>
@@ -217,9 +244,9 @@ export default function App() {
                 <div className="cards">
                   {lista.map((c) => { const ind = indicador(c); const ini = c.nome.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase(); return (
                     <article className="card-cand" key={c.numero}>
-                      <h3><span className="inicial" aria-hidden="true">{ini}</span><button onClick={() => abrirDetalhe(c)}>{c.nome}</button></h3>
+                      <h3><span className="inicial" aria-hidden="true">{ini}</span><button data-num={c.numero} onClick={() => abrirDetalhe(c)}>{c.nome}</button></h3>
                       <div className="meta">{c.cargo} · nº <strong>{c.numero}</strong> · PL-MA</div>
-                      <span className={`tag ${ind.nivel}`} aria-label={`Possibilidade: ${ind.rotulo}`}>{ind.rotulo}</span>
+                      <Selo ind={ind} />
                       <div className="meta" style={{ marginTop: '.4rem' }}>{c.impugnacao ? `⚖️ Impugnação em análise (${c.impugnacao.processo})` : `✅ ${c.situacao} · sem pendência localizada`}</div>
                     </article> ); })}
                 </div>
@@ -233,7 +260,7 @@ export default function App() {
             <button className="btn" onClick={fecharDetalhe}>← Voltar para a lista</button>
             <h2 tabIndex={-1} ref={tituloRef}>{detalhe.nome} · {detalhe.numero}</h2>
             <p className="meta">{detalhe.cargo} · {detalhe.partido}-{detalhe.uf} · {detalhe.abrangencia}</p>
-            {(() => { const ind = indicador(detalhe); return (<><p><span className={`tag ${ind.nivel}`}>{ind.rotulo}</span></p><p>{ind.motivo}</p></>); })()}
+            {(() => { const ind = indicador(detalhe); return (<><p><Selo ind={ind} /></p><p>{ind.motivo}</p></>); })()}
             <div className="secao"><h2>Situação e histórico</h2>
               <p><strong>Situação:</strong> {detalhe.situacao}{detalhe.impugnacao ? ` + impugnação ${detalhe.impugnacao.processo} (${detalhe.impugnacao.status})` : ''}</p>
               <p><strong>Histórico:</strong> {detalhe.historico}</p>
@@ -242,7 +269,8 @@ export default function App() {
             </div>
             {detalhe.numero === '222' && (
               <div className="secao"><h2>Pesquisas reais (Senado MA)</h2>
-                <p className="meta">Cidônio: 1% a 2,3% nas 4 pesquisas estaduais. Detalhes na aba Pesquisas.</p>
+                <p className="meta">Cidônio: 1% a 2,3% nas 4 pesquisas estaduais com registro no TSE.</p>
+                <button className="btn" onClick={() => irAba('pesquisas')}>Ver as 4 pesquisas</button>
               </div>
             )}
             <div className="secao"><h2>Conferir na fonte oficial</h2>
