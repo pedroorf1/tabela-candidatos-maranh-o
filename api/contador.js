@@ -19,7 +19,9 @@ const limpo = (v) => decodeURIComponent(v || '').replace(/[\r\n|=]/g, '').trim()
 async function lerTexto(token) {
   try {
     const meta = await head(ARQUIVO, { token });
-    const r = await fetch(meta.url, { cache: 'no-store' });
+    // O put sobrescreve mantendo a MESMA url: sem o carimbo abaixo o CDN
+    // entrega conteúdo antigo e o selo chega a exibir um total menor.
+    const r = await fetch(`${meta.url}?v=${Date.now()}`, { cache: 'no-store' });
     if (!r.ok) return null;
     return await r.text();
   } catch {
