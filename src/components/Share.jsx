@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { indicador } from '../lib/indicador.js';
 
 export function urlCandidato(c) {
-  const base = window.location.origin + window.location.pathname;
-  return `${base}?candidato=${encodeURIComponent(c.numero)}`;
+  return `${window.location.origin}/candidato/${encodeURIComponent(c.numero)}`;
 }
 
 export function textoCandidato(c) {
