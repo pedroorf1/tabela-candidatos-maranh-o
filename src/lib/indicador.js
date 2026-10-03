@@ -14,7 +14,7 @@ export function indicador(c) {
   if (c.numero === '222') {
     return {
       nivel: 'disputa',
-      rotulo: 'Em disputa',
+      rotulo: 'Em disputa · apoio formal',
       motivo: 'Apoiado oficialmente por Flávio Bolsonaro ao Senado, mas com 1% a 2,3% nas 4 pesquisas estaduais. Primeira disputa ao Senado; em 2024 fez 18.794 votos em Açailândia.',
     };
   }

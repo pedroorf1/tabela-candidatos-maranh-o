@@ -91,5 +91,5 @@ export const CANDIDATOS = [
 export async function buscarAtualizacaoWeb(_timeoutMs = 6000) {
   // Placeholder intencional: retorna indisponível offline, mantendo os dados locais.
   // Para ativar, aponte para endpoints públicos (ex.: dadosabertos TSE) com validação manual.
-  return { disponivel: false, motivo: 'Modo offline com dados organizados do corte 03/10/2026. Confira as fontes oficiais na aba Sobre.' };
+  return { disponivel: false, motivo: `Modo offline com dados organizados do corte ${CORTE}. Confira as fontes oficiais na aba Sobre.` };
 }
