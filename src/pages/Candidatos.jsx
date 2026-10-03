@@ -1,11 +1,22 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CANDIDATOS } from '../data/candidatos.js';
+import { GOVERNADORES } from '../data/governadores.js';
 import { indicador } from '../lib/indicador.js';
 import Selo from '../components/Selo.jsx';
 import { useApp } from '../store.js';
 
 const normaliza = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+// Base unificada: lista PL-MA + governadores (fora do PL, sem selo nem ficha)
+const TODOS = [
+  ...CANDIDATOS,
+  ...GOVERNADORES.map((g) => ({
+    nome: g.nome, numero: g.numero, cargo: 'Governador', partido: g.partido, uf: g.uf,
+    vinculoLabel: 'Candidatura majoritária — fora da lista PL-MA',
+    situacao: 'Confira no TSE', historico: g.resumo, isGov: true,
+  })),
+];
 
 export function Candidatos() {
   const navigate = useNavigate();
@@ -32,10 +43,14 @@ export function Candidatos() {
 
   const lista = useMemo(() => {
     const q = normaliza(busca.trim());
-    const r = CANDIDATOS.filter((c) => {
+    const r = TODOS.filter((c) => {
       if (cargo && c.cargo !== cargo) return false;
-      const ind = indicador(c).nivel;
-      if (filtroInd && ind !== filtroInd) return false;
+      if (!c.isGov) {
+        const ind = indicador(c).nivel;
+        if (filtroInd && ind !== filtroInd) return false;
+      } else if (filtroInd) {
+        return false; // governadores não têm indicador (fora da lista PL)
+      }
       if (preset === 'forte' && !c.reeleicao) return false;
       if (preset === 'novatos' && (c.reeleicao || c.numero === '222' || c.impugnacao)) return false;
       if (preset === 'flavio' && c.vinculoFlavio !== 'apoiado') return false;
@@ -49,20 +64,24 @@ export function Candidatos() {
     return [...r].sort((a, b) => {
       if (ordem === 'nome') return a.nome.localeCompare(b.nome, 'pt-BR');
       if (ordem === 'numero') return a.numero.localeCompare(b.numero, undefined, { numeric: true });
-      const oc = { Senador: 0, 'Deputado Federal': 1, 'Deputado Estadual': 2 };
-      return oc[a.cargo] - oc[b.cargo] || a.numero.localeCompare(b.numero, undefined, { numeric: true });
+      const oc = { Governador: 0, Senador: 1, 'Deputado Federal': 2, 'Deputado Estadual': 3 };
+      return (oc[a.cargo] ?? 9) - (oc[b.cargo] ?? 9) || a.numero.localeCompare(b.numero, undefined, { numeric: true });
     });
   }, [busca, cargo, filtroInd, preset, ordem]);
 
   const abrir = (c) => {
+    if (c.isGov) {
+      navigate('/governador');
+      return;
+    }
     setUltimo(c.numero);
     navigate(`/candidato/${c.numero}`);
   };
 
   return (
     <section aria-label="Candidatos" className="pagina">
-      <h2 style={{ marginBottom: 0 }}>Candidatos do PL · Maranhão 2026</h2>
-      <p className="meta">Busque por nome, partido, UF ou número de urna. Toque em um candidato para ver a ficha completa e compartilhar.</p>
+      <h2 style={{ marginBottom: 0 }}>Candidatos · Maranhão 2026</h2>
+      <p className="meta">Lista PL-MA + Governo do estado. Busque por nome, partido, UF ou número de urna. Toque em um candidato para ver a ficha completa e compartilhar.</p>
       <label className="rotulo-busca" htmlFor="busca-nome">Buscar candidato</label>
       <div className="busca">
         <input id="busca-nome" type="search" aria-label="Buscar por nome, partido, UF ou número" placeholder="Nome, partido, UF ou número… ex.: PL-MA, Detinha ou 22333" value={busca} onChange={(e) => setFiltro({ busca: e.target.value })} />
@@ -74,12 +93,13 @@ export function Candidatos() {
         ))}
       </div>
       <div className="filtros">
-        <select aria-label="Filtrar por cargo" value={cargo} onChange={(e) => setFiltro({ cargo: e.target.value })}>
-          <option value="">Todos os cargos</option>
-          <option>Senador</option>
-          <option>Deputado Federal</option>
-          <option>Deputado Estadual</option>
-        </select>
+              <select aria-label="Filtrar por cargo" value={cargo} onChange={(e) => setFiltro({ cargo: e.target.value })}>
+                <option value="">Todos os cargos</option>
+                <option>Governador</option>
+                <option>Senador</option>
+                <option>Deputado Federal</option>
+                <option>Deputado Estadual</option>
+              </select>
         <select aria-label="Filtrar por indicador" value={filtroInd} onChange={(e) => setFiltro({ filtroInd: e.target.value })}>
           <option value="">Todos os indicadores</option>
           <option value="forte">Base forte</option>
@@ -93,7 +113,7 @@ export function Candidatos() {
           <option value="numero">Ordenar: número</option>
         </select>
       </div>
-      <p className="contador" aria-live="polite">{lista.length} de {CANDIDATOS.length} encontrados</p>
+      <p className="contador" aria-live="polite">{lista.length} de {TODOS.length} encontrados</p>
       {lista.length === 0 ? (
         <div className="empty"><p>Nenhum candidato com esse filtro.</p><button className="btn primary" onClick={limparBusca}>Mostrar todos</button></div>
       ) : (
@@ -103,12 +123,12 @@ export function Candidatos() {
               <thead><tr><th scope="col">Candidato</th><th scope="col">Cargo · Número</th><th scope="col">Indicador</th><th scope="col">Situação</th></tr></thead>
               <tbody>
                 {lista.map((c) => {
-                  const ind = indicador(c);
+                  const ind = c.isGov ? null : indicador(c);
                   return (
-                    <tr key={c.numero}>
+                    <tr key={c.numero + c.cargo}>
                       <td><button className="btn small" data-num={c.numero} onClick={() => abrir(c)}><strong>{c.nome}</strong></button><br /><span className="meta">{c.vinculoLabel}</span></td>
                       <td>{c.cargo}<br /><strong>{c.numero}</strong></td>
-                      <td><Selo ind={ind} /></td>
+                      <td>{ind ? <Selo ind={ind} /> : <span className="tag neutro" title="Indicador vale só para a lista PL-MA">Sem indicador</span>}</td>
                       <td>{c.impugnacao ? 'Impugnação em análise' : c.situacao}</td>
                     </tr>
                   );
@@ -118,14 +138,14 @@ export function Candidatos() {
           </div>
           <div className="cards">
             {lista.map((c) => {
-              const ind = indicador(c);
+              const ind = c.isGov ? null : indicador(c);
               const ini = c.nome.split(' ').filter(Boolean).slice(0, 2).map((x) => x[0]).join('').toUpperCase();
               return (
-                <article className="card-cand" key={c.numero}>
+                <article className="card-cand" key={c.numero + c.cargo}>
                   <h3><span className="inicial" aria-hidden="true">{ini}</span><button data-num={c.numero} onClick={() => abrir(c)}>{c.nome}</button></h3>
-                  <div className="meta">{c.cargo} · nº <strong>{c.numero}</strong> · PL-MA</div>
-                  <Selo ind={ind} />
-                  <div className="meta" style={{ marginTop: '.4rem' }}>{c.impugnacao ? `⚖️ Impugnação em análise (${c.impugnacao.processo})` : `✅ ${c.situacao} · sem pendência localizada`}</div>
+                  <div className="meta">{c.cargo} · nº <strong>{c.numero}</strong> · {c.partido}-{c.uf}</div>
+                  {ind ? <Selo ind={ind} /> : <span className="tag neutro" title="Indicador vale só para a lista PL-MA">Sem indicador</span>}
+                  <div className="meta" style={{ marginTop: '.4rem' }}>{c.isGov ? '⚖️ Situação: confira no TSE' : (c.impugnacao ? `⚖️ Impugnação em análise (${c.impugnacao.processo})` : `✅ ${c.situacao} · sem pendência localizada`)}</div>
                 </article>
               );
             })}
