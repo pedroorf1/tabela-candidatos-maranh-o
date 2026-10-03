@@ -78,6 +78,7 @@ export default function App() {
 
   const abrirDetalhe = (c) => {
     ultimoBtn.current = c.numero;
+    setAba('candidatos'); // a ficha só existe nesta aba (botão da Home caía no vazio)
     setDetalhe(c);
     try { window.history.pushState({}, '', `?candidato=${encodeURIComponent(c.numero)}`); } catch {}
     window.scrollTo({ top: 0 });
