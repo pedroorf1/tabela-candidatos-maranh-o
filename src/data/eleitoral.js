@@ -11,6 +11,19 @@ export const PESQUISAS_SENADO = [
     resultado: { 'Cidônio Gonçalves': 2.3, 'Roseana': 22.1, 'Fufuca': 19.5, 'Weverton': 13.1, 'Lahesio': 11.7, 'Eliziane': 9.2, 'Hilton': 8.1 } },
 ];
 
+// Nome na urna, partido e número dos candidatos ao Senado-MA que aparecem nas
+// pesquisas — conferidos na lista do TSE via Valor Econômico (22/09/2026) e na
+// página do Senado (Agência Senado — candidatos MA).
+export const SENADO_URNA = {
+  'Cidônio Gonçalves': { urna: 'Cidônio Gonçalves', partido: 'PL', numero: '222' },
+  'Roseana': { urna: 'Roseana Sarney', partido: 'MDB', numero: '151' },
+  'Fufuca': { urna: 'Fufuca', partido: 'PP', numero: '111' },
+  'Weverton': { urna: 'Weverton Rocha', partido: 'PDT', numero: '123' },
+  'Lahesio': { urna: 'Lahesio Bonfim', partido: 'NOVO', numero: '300' },
+  'Eliziane': { urna: 'Eliziane Gama', partido: 'PT', numero: '133' },
+  'Hilton': { urna: 'Dr. Hilton Gonçalo', partido: 'MOBILIZA', numero: '333' },
+};
+
 export const PESQUISAS_MUNICIPAIS_NOTA =
   'Não foi localizado, nas fontes consultadas, levantamento municipal recente com percentuais para os candidatos. Por isso não exibimos percentuais por cidade — apenas resultados históricos verificáveis.';
 
@@ -29,5 +42,6 @@ export const FONTES = [
   { nome: 'TSE — Dados Abertos', url: 'https://dadosabertos.tse.jus.br/', uso: 'Histórico e resultados' },
   { nome: 'Minha Colinha — PL/MA', url: 'https://minhacolinha.com/partido/pl/ma', uso: 'Lista consolidada do PL-MA 2026' },
   { nome: 'Agência Senado — candidatos MA', url: 'https://www12.senado.leg.br/noticias/candidatos-2026/maranhao', uso: 'Dados de candidatos ao Senado' },
+  { nome: 'Valor Econômico — lista Senado MA (fonte TSE)', url: 'https://valor.globo.com/politica/eleicoes-2026/noticia/2026/09/22/candidatos-a-senador-pelo-maranhao-ma-veja-a-lista-atualizada-das-eleicoes-2026.ghtml', uso: 'Nome na urna, partido e número dos candidatos ao Senado' },
   { nome: 'Site oficial Flávio Bolsonaro', url: 'https://www.flaviobolsonaro.com.br/', uso: 'Apoio e documentação de campanha' },
 ];
